@@ -20,25 +20,24 @@ func New(config Config) (*sql.DB, error) {
 	return db, nil
 }
 
-func Init() error {
+func Init() (*sql.DB, error) {
 	config := Config{
 		Path: "./data/sqlite/tasks.db",
 	}
 
 	db, err := New(config)
 	if err != nil {
-		return fmt.Errorf("failed to create new connection: %w", err)
+		return nil, fmt.Errorf("failed to create new connection: %w", err)
 	}
 
 	DB = db
 
 	err = runMigrations()
 	if err != nil {
-		return fmt.Errorf("failed to run migrations: %w", err)
+		return nil, fmt.Errorf("failed to run migrations: %w", err)
 	}
 
-	fmt.Println("Database initialized succesfully")
-	return nil
+	return DB, nil
 }
 
 func runMigrations() error {
@@ -48,12 +47,11 @@ func runMigrations() error {
 		description TEXT NOT NULL ,
 		status TEXT NOT NULL DEFAULT 'todo',
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		deleted_at DATETIME
+		deleted_at DATETIME);
 
 		CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
     	CREATE INDEX IF NOT EXISTS idx_tasks_created_at ON tasks(created_at);
     	CREATE INDEX IF NOT EXISTS idx_tasks_deleted_at ON tasks(deleted_at);
-	);
 	`
 	_, err := DB.Exec(q)
 

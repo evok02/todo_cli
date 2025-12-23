@@ -8,9 +8,9 @@ import (
 type StatusType string
 
 const (
-	PendingStatus StatusType = "in-progress"
-	ToDoStatus    StatusType = "todo"
-	DoneStatus    StatusType = "done"
+	InProgressStatus StatusType = "in-progress"
+	ToDoStatus       StatusType = "todo"
+	DoneStatus       StatusType = "done"
 )
 
 type Task struct {
