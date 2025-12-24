@@ -164,17 +164,19 @@ func cmdList(c *Config, args ...string) error {
 	w := new(tabwriter.Writer)
 	w.Init(os.Stdout, 20, 0, 0, '\t', 0)
 	var m string
+
 	if len(args) > 0 {
 		m = args[0]
 	}
 	tasks, err := c.Repo.List(m)
+
 	if err != nil {
 		return err
 	}
 
 	fmt.Println("ID\tDescription\tStatus\tCreatedAt")
 	for _, t := range tasks {
-		fmt.Printf("%d\t%s\t%s\t%v\n", t.ID, t.Description, t.Status, t.CreatedAt)
+		fmt.Printf("%d\t%s\t%s\t%v\t\n", t.ID, t.Description, t.Status, t.CreatedAt)
 	}
 	w.Flush()
 
