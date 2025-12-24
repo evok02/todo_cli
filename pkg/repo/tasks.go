@@ -169,3 +169,57 @@ func (r Repo) MarkDone(id int) error {
 	return nil
 
 }
+
+func (r Repo) List(args ...string) ([]*sqlite.Task, error) {
+	tasks := []*sqlite.Task{}
+	var q string
+	switch args[0] {
+	case string(sqlite.InProgressStatus):
+		q = `
+		SELECT id, description, status, created_at FROM tasks
+		WHERE deleted_at IS NULL AND status = 'in-progress'
+		`
+	case string(sqlite.ToDoStatus):
+		q = `
+		SELECT id, description, status, created_at FROM tasks
+		WHERE deleted_at IS NULL AND status = 'todo'
+		`
+	case string(sqlite.DoneStatus):
+		q = `
+		SELECT id, description, status, created_at FROM tasks
+		WHERE deleted_at IS NULL AND status = 'done'
+		`
+	default:
+		q = `
+		SELECT id, description, status, created_at FROM tasks
+		WHERE deleted_at IS NULL
+		`
+	}
+
+	rows, err := r.db.Query(q)
+	if err != nil {
+		return nil, fmt.Errorf("couldn't execute the query: %w", err)
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var task sqlite.NullTask
+
+		err := rows.Scan(
+			&task.ID,
+			&task.Description,
+			&task.Status,
+			&task.CreatedAt,
+		)
+
+		if err != nil {
+			return nil, fmt.Errorf("couldn't extract the row: %w", err)
+		}
+
+		fmtTask := task.ToTask()
+		tasks = append(tasks, fmtTask)
+	}
+
+	return tasks, nil
+}
